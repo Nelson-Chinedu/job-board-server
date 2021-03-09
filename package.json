@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node build/src/index.js",
+    "start": "cross-env NODE_ENV=production yarn build && node build/src/index.js",
     "dev": "cross-env NODE_ENV=development nodemon",
     "tslint": "tslint -c tslint.json 'src/**/*.ts'",
     "build": "tsc",
