@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors, { CorsOptions } from 'cors';
 import Stripe from 'stripe';
 import winstonEnvLogger from 'winston-env-logger';
+
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -28,30 +29,36 @@ app.post('/create-checkout-session', async (req: Request, res: Response) => {
 
   const { plan, price }: IRequest = req.body;
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `${plan} Plan`,
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${plan} Plan`,
+            },
+            unit_amount: price,
           },
-          unit_amount: price,
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: `${process.env.CLIENT_URL}payment/success`,
-    cancel_url: `${process.env.CLIENT_URL}/payment/failure`,
-  });
-
-  res.json({ id: session.id });
+      ],
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL}/payment/success`,
+      cancel_url: `${process.env.CLIENT_URL}/payment/failure`,
+    });
+    res.json({ id: session.id });
+  } catch (error) {
+    winstonEnvLogger.error({
+      message: 'An error occured',
+      error: error.message
+    })
+  }
 });
 
 app.get('/', (_req: Request, res: Response) => {
-  res.send('Api for job board');
+  res.send('Fuck off!!!');
 });
 
 app.listen(port, () => {
