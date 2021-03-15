@@ -8,6 +8,7 @@ Post and Find remote jobs
 ## Technologies Used
 - Node.Js/ExpressJs
 - TypeScript
+- Stripe
 
 ## Prerequisites
 The following should be installed in your machine
