@@ -1,10 +1,25 @@
+import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import cors, { CorsOptions } from 'cors';
 import Stripe from 'stripe';
 import winstonEnvLogger from 'winston-env-logger';
+import mongoose from 'mongoose';
+
+import Jobs from './model/job';
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+mongoose.connect(process.env.MONGOLAB_URI as string,{
+  useUnifiedTopology: true,
+  useNewUrlParser: true
+});
+
+mongoose.connection.once('open', () => {
+  winstonEnvLogger.info('connected to db 🚀🚀');
+});
 
 const stripe = new Stripe(process.env.SECRET_KEY as string,{
   apiVersion: '2020-08-27',
@@ -53,8 +68,15 @@ app.post('/create-checkout-session', async (req: Request, res: Response) => {
     winstonEnvLogger.error({
       message: 'An error occured',
       error: error.message
-    })
+    });
   }
+});
+
+app.get('/api/jobs', (_req: any, res: any) => {
+  Jobs.find({}).then((job: any) => {
+    return res.send(job);
+  });
+
 });
 
 app.get('/', (_req: Request, res: Response) => {
