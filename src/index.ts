@@ -72,11 +72,31 @@ app.post('/create-checkout-session', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/api/jobs', (_req: any, res: any) => {
-  Jobs.find({}).then((job: any) => {
-    return res.send(job);
-  });
+app.get('/api/jobs', (_req: Request, res: Response) => {
+  try {
+    Jobs.find({}).then((job: object) => {
+      return res.send(job);
+    });
+  } catch (error) {
+    winstonEnvLogger.error({
+      message: 'An error occurred',
+      error
+    });
+  }
+});
 
+app.get('/api/job', (req: Request, res: Response) => {
+  try {
+    const { query:{ q }} = req;
+    Jobs.findById(q).then((job: object) => {
+      return res.send(job);
+    });
+  } catch (error) {
+    winstonEnvLogger.error({
+      message: 'An error occured',
+      error
+    });
+  }
 });
 
 app.get('/', (_req: Request, res: Response) => {
