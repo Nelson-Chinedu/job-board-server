@@ -12,23 +12,23 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
-mongoose.connect(process.env.MONGOLAB_URI as string,{
+mongoose.connect(process.env.MONGOLAB_URI as string, {
   useUnifiedTopology: true,
-  useNewUrlParser: true
+  useNewUrlParser: true,
 });
 
 mongoose.connection.once('open', () => {
   winstonEnvLogger.info('connected to db 🚀🚀');
 });
 
-const stripe = new Stripe(process.env.SECRET_KEY as string,{
+const stripe = new Stripe(process.env.SECRET_KEY as string, {
   apiVersion: '2020-08-27',
 });
 
 const corsOptions: CorsOptions = {
   origin: true,
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -41,7 +41,6 @@ interface IRequest {
 }
 
 app.post('/create-checkout-session', async (req: Request, res: Response) => {
-
   const { plan, price }: IRequest = req.body;
 
   try {
@@ -67,34 +66,53 @@ app.post('/create-checkout-session', async (req: Request, res: Response) => {
   } catch (error) {
     winstonEnvLogger.error({
       message: 'An error occured',
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 app.get('/api/jobs', (_req: Request, res: Response) => {
   try {
-    Jobs.find({}).then((job: object) => {
+    Jobs.find({}).then((job: object[]) => {
       return res.send(job);
     });
   } catch (error) {
     winstonEnvLogger.error({
       message: 'An error occurred',
-      error
+      error,
     });
   }
 });
 
 app.get('/api/job', (req: Request, res: Response) => {
   try {
-    const { query:{ q }} = req;
+    const {
+      query: { q },
+    } = req;
     Jobs.findById(q).then((job: object) => {
       return res.send(job);
     });
   } catch (error) {
     winstonEnvLogger.error({
       message: 'An error occured',
-      error
+      error,
+    });
+  }
+});
+
+app.get('/api/jobs/q', (req: Request, res: Response): any => {
+  const { limit } = req.query;
+  const pageLimit: number = Number(limit);
+  try {
+    Jobs.find({})
+      .limit(pageLimit)
+      .then((job: object[]) => {
+        res.send(job);
+      });
+  } catch (error) {
+    winstonEnvLogger.error({
+      message: 'An error occured',
+      error,
     });
   }
 });
@@ -105,6 +123,6 @@ app.get('/', (_req: Request, res: Response) => {
 
 app.listen(port, () => {
   winstonEnvLogger.info({
-    message: `Server started on port ${port}`
+    message: `Server started on port ${port}`,
   });
 });
